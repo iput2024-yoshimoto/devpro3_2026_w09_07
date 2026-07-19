@@ -41,7 +41,7 @@ jobs:
           PROJECT_HOME: ${{ github.workspace }}
           PYTHONPATH: ${{ github.workspace }}/lastwork
         run: |
-          pytest lastwork --cov=lastwork --cov-report=term-missing --junitxml=pytest.xml | tee pytest-coverage.txt
+          pytest tests --cov=lastwork --cov-report=term-missing --junitxml=pytest.xml | tee pytest-coverage.txt
         continue-on-error: true
   
       # テスト結果をプルリクにコメントする
