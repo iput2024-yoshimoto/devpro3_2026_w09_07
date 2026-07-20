@@ -6,7 +6,7 @@ import csv
 import socket
 import threading
 import os
-
+#yoshimoto
 DATA_DIR = 'lastwork'
 CSV_FILENAME = 'sensor_data.csv'
 DEFAULT_FILENAME = DATA_DIR + '/' + CSV_FILENAME
