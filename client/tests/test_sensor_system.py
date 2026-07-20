@@ -4,7 +4,8 @@ import csv
 import socket
 import pytest
 from unittest.mock import MagicMock, patch
-
+os.environ.setdefault("WAITING_PORT", "8765")
+os.environ.setdefault("SERVER_IP", "127.0.0.1")
 # テスト対象モジュールのインポート
 import app2
 import get_co2_data
