@@ -32,15 +32,14 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install ".[dev]"
            
-      # ユニットテスト実行
+      # ユニットテスト実行（pytest-covの機能で直接テキストを出力）
       - name: Run tests
         run: |
-          pytest | tee pytest-coverage.txt
+          pytest --cov=server --cov=app --cov-report=term-missing --cov-report=annotate --cov-report=term > pytest-coverage.txt
         continue-on-error: true
-  
-      # テスト結果をプルリクにコメントする
+
+      # テスト結果をコメントする
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main
         with:
           pytest-coverage-path: ./pytest-coverage.txt
-          junitxml-path: ./pytest.xml
