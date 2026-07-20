@@ -13,7 +13,7 @@ SOCKET_PORT = int(os.getenv('SOCKET_PORT'))
 
 def socket_server_loop():
     socket_w = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    socket_w.setsockopt(socket.SOC_SOCKET, socket.SO_REUSEADDR, 1)
+    socket_w.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     socket_w.bind((SOCKET_HOST, SOCKET_PORT))
     socket_w.listen(5)
 
