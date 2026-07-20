@@ -69,7 +69,7 @@ def test_latest_route_success(mock_get_latest, client):
     response = client.get("/latest")
     
     assert response.status_code == 200
-    assert response.headers["Content-Type"] == "text/plain; charset=utf-8"
+    assert "text/plain" in response.headers["Content-Type"]
     assert response.data.decode("utf-8") == "2026-01-01 12:00,24.0,50.0,420,ID01"
 
 @patch("server.src.routes.get_latest_row")

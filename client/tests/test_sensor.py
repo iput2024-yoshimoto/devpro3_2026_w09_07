@@ -6,6 +6,7 @@ import get_dht_data
 import sensor
 import dht22_takemoto as dht22
 
+
 class TestSensorModules:
 
     @patch("subprocess.check_output")
@@ -48,12 +49,14 @@ class TestSensorModules:
         mock_get_dht.return_value = (24.0, 58.0)
         mock_get_co2.return_value = 400
         
-        # 無限ループを1回目で止めるために、2回目のサイクルで例外投げる
-        mock_send_server.side_effect = [None, KeyboardInterrupt("Stop loop")]
+        # 1回目の send_data_to_server 呼び出し時に KeyboardInterrupt を発生させてループを終了
+        mock_send_server.side_effect = KeyboardInterrupt("Stop loop")
 
         with patch("time.sleep"):
             with pytest.raises(KeyboardInterrupt):
                 sensor.main_loop("localhost", 8765)
         
-        # 1回目のサイクルでデータ送信関数が呼ばれたか確認
-        assert mock_send_server.call_count >= 1
+        # 1回正しくデータ送信関数およびデータ取得関数が呼ばれたか検証
+        mock_send_server.assert_called_once()
+        mock_get_dht.assert_called_once()
+        mock_get_co2.assert_called_once()

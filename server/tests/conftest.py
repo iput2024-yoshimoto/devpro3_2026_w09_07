@@ -6,12 +6,11 @@ import pytest
 sys.modules['lgpio'] = MagicMock()
 sys.modules['mh_z19'] = MagicMock()
 
-# 2. 自動モック（すべてのテストでソケットサーバー等のループ関数を安全に無効化）
+# test_socket_server 以外のテスト（test_app など）で無限ループに入るのを防止するフィクスチャ
 @pytest.fixture(autouse=True)
-def mock_infinite_loops(monkeypatch):
-    """ソケットサーバー等の無限ループ処理を安全なダミー関数に自動差し替え"""
-    dummy_func = MagicMock()
-    
-    # socket_server モジュールのループ処理をモック化
-    monkeypatch.setattr("server.src.socket_server.socket_server_loop", dummy_func, raising=False)
-    monkeypatch.setattr("server.src.app.socket_server_loop", dummy_func, raising=False)
+def mock_infinite_loops(request, monkeypatch):
+    """test_socket_server 以外のテスト実行時のみ socket_server_loop をモック化"""
+    if "test_socket_server" not in request.node.nodeid:
+        dummy_func = MagicMock()
+        monkeypatch.setattr("server.src.socket_server.socket_server_loop", dummy_func, raising=False)
+        monkeypatch.setattr("server.src.app.socket_server_loop", dummy_func, raising=False)
