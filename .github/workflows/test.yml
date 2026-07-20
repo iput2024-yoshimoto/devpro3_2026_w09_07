@@ -38,6 +38,7 @@ jobs:
         env:
           PYTHONPATH: .
           DATA_DIR: ./lastwork
+          CSV_FILENAME: sensor_data.csv
         run: |
           pytest --cov=server/src --cov=client/src --cov-report=term-missing
       # テスト結果をコメントする
