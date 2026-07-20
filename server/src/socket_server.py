@@ -9,7 +9,7 @@ from csv_handler import save_sensor_row
 load_dotenv()
 
 SOCKET_HOST = os.getenv('SOCKET_HOST')
-SOCKET_PORT = int(os.getenv('SOCKET_PORT'))
+SOCKET_PORT = int(os.getenv('SOCKET_PORT', '5000'))
 
 def socket_server_loop():
     socket_w = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
