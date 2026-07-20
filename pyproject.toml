@@ -22,3 +22,6 @@ minversion = "8.0"
 testpaths = ["tests"]
 pythonpath = "."
 addopts = "-v"
+
+[tool.setuptools.packages.find]
+include = ["server*", "app*"]
