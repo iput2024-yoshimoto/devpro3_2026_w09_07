@@ -3,11 +3,12 @@ from unittest.mock import patch, MagicMock
 from flask import Flask
 
 # テスト対象モジュールのインポート（パスは適宜プロジェクトに合わせて変更してください）
-from server.src.app import app as app_module
+import server.src.app as app_module
+from server.src.app import create_app
 
 def test_create_app():
     """create_appがFlaskアプリケーションを正しく生成し、Blueprintが登録されているか検証"""
-    app = app_module.create_app()
+    app = create_app()
     assert isinstance(app, Flask)
     assert "main" in app.blueprints
 
