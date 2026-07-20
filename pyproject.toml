@@ -26,7 +26,7 @@ testpaths = [
     "client/tests"
 ]
 [tool.setuptools.packages.find]
-where = [""server", "client"]
+where = ["server", "client"]
 include = ["src*"]
 
 [tool.coverage.report]
