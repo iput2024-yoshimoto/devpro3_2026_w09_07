@@ -2,9 +2,9 @@ import pytest
 from unittest.mock import patch, MagicMock
 from flask import Flask
 
-# テスト対象モジュールのインポート（パスは適宜プロジェクトに合わせて変更してください）
 import server.src.app as app_module
 from server.src.app import create_app
+
 
 def test_create_app():
     """create_appがFlaskアプリケーションを正しく生成し、Blueprintが登録されているか検証"""
@@ -12,33 +12,34 @@ def test_create_app():
     assert isinstance(app, Flask)
     assert "main" in app.blueprints
 
-@patch("app.threading.Thread")
-@patch("app.create_app")
-def test_main_execution(mock_create_app, mock_thread):
-    """__name__ == '__main__' のブロックが正常にスレッドとFlaskを起動するか検証"""
-    mock_app_instance = MagicMock()
-    mock_create_app.return_value = mock_app_instance
+
+@patch("flask.Flask.run")  # ← Flaskのサーバー起動処理を横取りしてブロックを防ぐ
+@patch("server.src.app.socket_server_loop")
+@patch("server.src.app.threading.Thread")
+def test_main_execution(mock_thread, mock_socket_loop, mock_flask_run):
+    """__name__ == '__main__' のブロック相当の動きを検証"""
+    
     mock_thread_instance = MagicMock()
     mock_thread.return_value = mock_thread_instance
 
+    # ソケットスレッドの起動模倣
+    socket_thread = app_module.threading.Thread(
+        target=mock_socket_loop, 
+        daemon=True
+    )
+    socket_thread.start()
+    
+    # アプリ作成と起動模倣 (mock_flask_run がブロックを防止)
+    app = app_module.create_app()
+    app.run(
+        host=app_module.FLASK_HOST,
+        port=app_module.FLASK_PORT,
+        debug=app_module.FLASK_DEBUG
+    )
 
-    with patch.object(app_module, "__name__", "__main__"):
-
-        socket_thread = app_module.threading.Thread(
-            target=app_module.socket_server_loop, 
-            daemon=True
-        )
-        socket_thread.start()
-        
-        flask_app = app_module.create_app()
-        flask_app.run(
-            host=app_module.FLASK_HOST,
-            port=app_module.FLASK_PORT,
-            debug=app_module.FLASK_DEBUG
-        )
-
+    # 検証
     mock_thread_instance.start.assert_called_once()
-    mock_app_instance.run.assert_called_once_with(
+    mock_flask_run.assert_called_once_with(
         host=app_module.FLASK_HOST,
         port=app_module.FLASK_PORT,
         debug=app_module.FLASK_DEBUG
