@@ -34,14 +34,16 @@ jobs:
           python -m pip install ".[dev]"
            
       # # ユニットテスト実行
+      # ユニットテスト実行
       - name: Run tests
         timeout-minutes: 2
         env:
-          PYTHONPATH: .
+          PYTHONPATH: .:server/src:client/src
           DATA_DIR: ./lastwork
           CSV_FILENAME: sensor_data.csv
+          SOCKET_PORT: 5000
         run: |
-          pytest --cov=server/src --cov=client/src --cov-report=term-missing
+          pytest -v -s --cov=server/src --cov=client/src --cov-report=term-missing
       # テスト結果をコメントする
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main
