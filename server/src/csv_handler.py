@@ -1,19 +1,46 @@
-import pytest
-from unittest.mock import patch, mock_open, MagicMock
-import server.src.csv_handler as csv_handler
+import csv
+import os
+import threading
+from dotenv import load_dotenv
 
-def test_save_sensor_row():
-    """CSVへ行データが正しく追記保存されるか検証"""
-    row_data = ["2026-01-01 10:00:00", "25.0", "50.0", "400", "Student_A"]
-    
-    # csv.writer をモック化して内部の writerow 呼び出しを検証する
-    mock_writer_instance = MagicMock()
-    
-    with patch.object(csv_handler, "ensure_data_dir"), \
-         patch("builtins.open", mock_open()), \
-         patch("csv.writer", return_value=mock_writer_instance):
-        
-        csv_handler.save_sensor_row(row_data)
-        
-        # writerow が正しいデータで呼ばれたか検証
-        mock_writer_instance.writerow.assert_called_once_with(row_data)
+load_dotenv()
+
+# CI環境などで環境変数がセットされていない場合でも落ちないよう、初期値を設定
+DATA_DIR = os.getenv('DATA_DIR', './lastwork')
+CSV_FILENAME = os.getenv('CSV_FILENAME', 'sensor_data.csv')
+
+DEFAULT_FILENAME = os.path.join(DATA_DIR, CSV_FILENAME)
+
+file_lock = threading.Lock()
+
+def ensure_data_dir():
+    if not os.path.exists(DATA_DIR):
+        os.makedirs(DATA_DIR)
+
+def save_sensor_row(row, filename=DEFAULT_FILENAME):
+    ensure_data_dir()
+
+    with file_lock:
+        with open(filename, mode='a', encoding='utf-8', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(row)
+
+def read_all_rows(filename=DEFAULT_FILENAME):
+    data_list = []
+    with file_lock:
+        if os.path.exists(filename):
+            with open(filename, mode='r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.replace('\n', '').strip()
+                    if line:
+                        data_list.append(line.split(','))
+    return data_list
+
+def get_latest_row(filename=DEFAULT_FILENAME):
+    with file_lock:
+        if os.path.exists(filename):
+            with open(filename, mode='r', encoding='utf-8') as f:
+                rows = list(csv.reader(f))
+                if rows:
+                    return rows[-1]
+    return None
