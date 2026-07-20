@@ -21,7 +21,11 @@ dev = [
 minversion = "8.0"
 testpaths = ["tests"]
 pythonpath = "."
-addopts = "-v"
+addopts = "-v"[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+pythonpath = "."
+addopts = "-v --cov=server --cov=app --cov-report=term-missing"
 
 [tool.setuptools.packages.find]
 include = ["server*", "app*"]
