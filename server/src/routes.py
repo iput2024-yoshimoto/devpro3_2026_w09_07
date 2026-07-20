@@ -2,7 +2,7 @@ import datetime
 import os
 from dotenv import load_dotenv
 from flask import Blueprint, render_template, request
-from csv_handler import read_all_rows, save_sensor_row, get_latest_row
+from server.src.csv_handler import read_all_rows, save_sensor_row, get_latest_row
 
 load_dotenv()
 

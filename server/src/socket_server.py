@@ -4,7 +4,7 @@ import datetime
 import time
 import os
 from dotenv import load_dotenv
-from csv_handler import save_sensor_row
+from server.src.csv_handler import save_sensor_row
 
 load_dotenv()
 
