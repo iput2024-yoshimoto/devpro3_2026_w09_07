@@ -2,8 +2,8 @@ import os
 import threading
 from dotenv import load_dotenv
 from flask import Flask
-from server.src.routes import main_bp
-from server.src.socket_server import socket_server_loop
+from routes import main_bp
+from socket_server import socket_server_loop
 
 load_dotenv()
 

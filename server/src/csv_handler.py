@@ -6,9 +6,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DATA_DIR = os.getenv('DATA_DIR')
-CSV=FILENAME = os.getenv('CSV_FILENAME')
+CSV_FILENAME = os.getenv('CSV_FILENAME')
 
-DEFAULT_FILENAME = os.path.join(DATA_DIR, 'CSV_FILENAME')
+DEFAULT_FILENAME = os.path.join(DATA_DIR, CSV_FILENAME)
 
 file_lock = threading.Lock()
 
@@ -17,10 +17,10 @@ def ensure_data_dir():
         os.makedirs(DATA_DIR)
 
 def save_sensor_row(row, filename=DEFAULT_FILENAME):
-    ensure_data_dir
+    ensure_data_dir()
 
     with file_lock:
-        with open(filename, mode='a', encoding='utf-8)', newline='')as f:
+        with open(filename, mode='a', encoding='utf-8', newline='')as f:
             writer = csv.writer(f)
             writer.writerow(row)
 
