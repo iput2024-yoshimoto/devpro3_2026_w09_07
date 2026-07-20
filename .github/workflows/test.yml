@@ -36,7 +36,8 @@ jobs:
       # # ユニットテスト実行
       - name: Run tests
         env:
-          PYTHONPATH: server/src:client/src
+          PYTHONPATH: .
+          DATA_DIR: ./lastwork
         run: |
           pytest --cov=server/src --cov=client/src --cov-report=term-missing
       # テスト結果をコメントする
