@@ -5,7 +5,7 @@ import datetime
 import json
 import socket
 import config
-# ↓ CO2センサー用のモジュールをインポート（環境に合わせてファイル名を変更してください）
+# ↓CO2センサー用のモジュールをインポート（環境に合わせてファイル名を変更してください）
 from get_co2_data import get_co2_data 
 
 SERVER = config.SERVER # 受信サーバのIPアドレス

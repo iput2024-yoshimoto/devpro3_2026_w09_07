@@ -7,7 +7,7 @@
 # https://github.com/szazo/DHT11_Python.git
 #
 # This class is a refactoring of a library 
-# originally written by Zoltan Szarvas using RPi.GPIO,
+# originally written by Zoltan Szarvas using RPi.GPIO
 # converted to use the lgpio library.
 #
 # To install lgpio,

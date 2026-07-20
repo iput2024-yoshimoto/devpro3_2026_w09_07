@@ -1,7 +1,7 @@
 import mh_z19
 import subprocess
 import ast
-
+#
 def get_co2_data():
     try:
         mhz19b_out_bytes = subprocess.check_output(['sudo', '/home/pi/devpro3/venv313/bin/python', '-m', 'mh_z19'])
