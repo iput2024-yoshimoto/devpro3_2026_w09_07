@@ -32,10 +32,10 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install ".[dev]"
            
-      # ユニットテスト実行（pytest-covの機能で直接テキストを出力）
+      # ユニットテスト実行（余計なオプションを削り、標準的なテーブル出力のみを保存）
       - name: Run tests
         run: |
-          pytest --cov=server --cov=app --cov-report=term-missing --cov-report=annotate --cov-report=term > pytest-coverage.txt
+          pytest --cov --cov-report=term-missing > pytest-coverage.txt
         continue-on-error: true
 
       # テスト結果をコメントする
