@@ -55,7 +55,7 @@ class TestFlaskEndpoints:
         assert response.status_code == 200
         assert response.data == b"Success"
 
-        # CSVに正しく書き込まれたか確認
+        # CSV正しく書き込まれたか確認
         with open(mock_csv_dir, mode='r', encoding='utf-8') as f:
             reader = list(csv.reader(f))
             assert len(reader) == 1
