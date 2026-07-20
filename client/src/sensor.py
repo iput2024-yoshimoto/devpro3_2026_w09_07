@@ -9,7 +9,7 @@ import config
 from get_co2_data import get_co2_data 
 
 SERVER = config.SERVER # 受信サーバのIPアドレス
-WAITING_PORT = config.WAITING_PORT
+WAITING_PORT = int(config.WAITING_PORT)
 NAME = config.NAME
 
 WAIT_INTERVAL_RETRY = 5
