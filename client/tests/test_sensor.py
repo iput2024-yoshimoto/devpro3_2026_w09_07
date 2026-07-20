@@ -48,7 +48,7 @@ class TestSensorModules:
         mock_get_dht.return_value = (24.0, 58.0)
         mock_get_co2.return_value = 400
         
-        # 無限ループを1回目で止めるために、2回目のサイクルで例外を投げる
+        # 無限ループを1回目で止めるために、2回目のサイクルで例外投げる
         mock_send_server.side_effect = [None, KeyboardInterrupt("Stop loop")]
 
         with patch("time.sleep"):
