@@ -35,7 +35,7 @@ jobs:
       # ユニットテスト実行
       - name: Run tests
         run: |
-          pytest --cov=server --cov=app --cov-report=term-missing > pytest-coverage.txt
+          pytest --cov=server/src --cov=client/src --cov-report=term-missing > pytest-coverage.txt
         # continue-on-error: true  # ← テスト自体をしっかり検知したい場合はコメントアウトまたは削除
 
       # テスト結果をコメントする
