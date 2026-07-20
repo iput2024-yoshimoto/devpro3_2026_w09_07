@@ -17,10 +17,17 @@ dev = [
     "pytest-cov>=4.0",
 ]
 [tool.pytest.ini_options]
-minversion = "8.0"
-testpaths = ["tests"]
-pythonpath = "."
-addopts = "-v"
-
+pythonpath = [
+    "server/src",
+    "client/src"
+]
+testpaths = [
+    "server/tests",
+    "client/tests"
+]
 [tool.setuptools.packages.find]
-include = ["server*", "app*"]
+where = [""server", "client"]
+include = ["src*"]
+
+[tool.coverage.report]
+show_missing = true
