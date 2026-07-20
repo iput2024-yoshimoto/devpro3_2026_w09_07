@@ -15,7 +15,7 @@ def create_app():
     app = Flask(__name__)
     app.register_blueprint(main_bp)
     return app
-
+app = create_app()
 if __name__ == "__main__":
     socket_thread = threading.Thread(target=socket_server_loop, daemon=True)
     socket_thread.start()
