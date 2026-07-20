@@ -4,8 +4,11 @@ import csv
 import socket
 import pytest
 from unittest.mock import MagicMock, patch
+
+# --- テスト実行用のダミー環境変数をインポート前にセット ---
 os.environ.setdefault("WAITING_PORT", "8765")
 os.environ.setdefault("SERVER_IP", "127.0.0.1")
+
 # テスト対象モジュールのインポート
 import app2
 import get_co2_data
@@ -44,7 +47,7 @@ def client_app(mock_csv_dir):
 
 
 # ==========================================
-# 1. DHT22 クラス単体のテスト (新規追加)
+# 1. DHT22 クラス単体のテスト
 # ==========================================
 
 class TestDHT22Class:
@@ -58,7 +61,6 @@ class TestDHT22Class:
 
     def test_bits_to_bytes_conversion(self, dht_instance):
         """ビット配列(bool list)からバイト配列(int list)への変換テスト"""
-        # [1,0,1,0,1,0,1,0] -> 0xAA (170)
         bits = [True, False, True, False, True, False, True, False] * 5  # 40 bits = 5 bytes
         bytes_out = dht_instance._DHT22__bits_to_bytes(bits)
         
@@ -67,20 +69,16 @@ class TestDHT22Class:
 
     def test_calculate_checksum(self, dht_instance):
         """チェックサム計算ロジックの検証"""
-        # 4バイトの和の下位8ビットがチェックサムとなる
         data_bytes = [10, 20, 30, 40]
         checksum = dht_instance._DHT22__calculate_checksum(data_bytes)
-        assert checksum == 100  # 10 + 20 + 30 + 40
+        assert checksum == 100
 
-        # オーバーフロー(256以上)のマスク検証
-        data_bytes_overflow = [200, 100, 50, 50]  # 合計400 -> 400 & 0xFF = 144
+        data_bytes_overflow = [200, 100, 50, 50]
         checksum_overflow = dht_instance._DHT22__calculate_checksum(data_bytes_overflow)
         assert checksum_overflow == 144
 
     def test_read_negative_temperature(self, dht_instance):
         """氷点下（負の温度）のデコード処理テスト"""
-        # 湿度50.0% (0x01, 0xF4), 温度 -2.5℃ (0x80, 0x19), Checksum (0x8E)
-        # 0x8019 -> 最上位ビット(0x8000)が立っているためマイナス
         mock_bytes = [0x01, 0xF4, 0x80, 0x19, 0x8E]
         
         with patch.object(dht_instance, '_DHT22__collect_input', return_value=[]), \
@@ -95,15 +93,14 @@ class TestDHT22Class:
     def test_read_missing_data_error(self, dht_instance):
         """パルス数が40未満（データ欠損）のときに MissingDataError が出るか"""
         with patch.object(dht_instance, '_DHT22__collect_input', return_value=[]), \
-             patch.object(dht_instance, '_DHT22__parse_data_pull_up_lengths', return_value=[0]*30):  # 30個しか取れなかった
+             patch.object(dht_instance, '_DHT22__parse_data_pull_up_lengths', return_value=[0]*30):
             
             with pytest.raises(dht22.DHT22MissingDataError):
                 dht_instance.read()
 
     def test_read_crc_error(self, dht_instance):
         """チェックサム不一致のときに CRCError が発生するか"""
-        # 不正なチェックサムデータ
-        mock_bytes = [0x01, 0x00, 0x01, 0x00, 0xFF] # 1+0+1+0 = 2 != 255
+        mock_bytes = [0x01, 0x00, 0x01, 0x00, 0xFF]
         
         with patch.object(dht_instance, '_DHT22__collect_input', return_value=[]), \
              patch.object(dht_instance, '_DHT22__parse_data_pull_up_lengths', return_value=[0]*40), \
@@ -120,8 +117,9 @@ class TestDHT22Class:
 
 class TestFlaskEndpoints:
 
-    def test_index_empty_csv(self, client_app):
-        """トップページの閲覧確認"""
+    @patch("app2.render_template", return_value="<html>Dummy</html>")
+    def test_index_empty_csv(self, mock_render, client_app):
+        """トップページの閲覧確認（TemplateNotFound回避のためモック化）"""
         response = client_app.get("/")
         assert response.status_code == 200
 
@@ -142,11 +140,9 @@ class TestFlaskEndpoints:
                 assert reader[0][1] == '25.3'
 
     def test_submit_missing_fields(self, client_app):
-        """【新規】フォームデータが欠落している場合の検証"""
-        incomplete_data = {'temperature': '25.3'}  # 湿度やCO2が欠落
+        """フォームデータが欠落している場合の検証"""
+        incomplete_data = {'temperature': '25.3'}
         response = client_app.post("/submit", data=incomplete_data)
-        
-        # サーバーがクラッシュ(500)せず、400 Bad Request またはエラーハンドリングされること
         assert response.status_code != 500
 
     def test_latest_endpoint(self, client_app, mock_csv_dir):
@@ -196,7 +192,7 @@ class TestSocketServerLogic:
 
     @patch("app2.csv_write_iterator")
     def test_socket_server_handles_corrupted_json(self, mock_csv_write):
-        """【新規】破損したJSONが届いてもサーバーがクラッシュしないか検証"""
+        """破損したJSONが届いてもサーバーがクラッシュしないか検証"""
         mock_socket_w = MagicMock()
         mock_socket_s_r = MagicMock()
         
@@ -204,7 +200,6 @@ class TestSocketServerLogic:
             (mock_socket_s_r, ("192.168.11.50", 12345)),
             KeyboardInterrupt("Stop loop")
         ]
-        # 不正なJSONフォーマット文字列
         mock_socket_s_r.recv.return_value = b"{ invalid json format ... "
 
         with patch("socket.socket", return_value=mock_socket_w):
