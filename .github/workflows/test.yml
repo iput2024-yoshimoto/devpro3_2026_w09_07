@@ -30,6 +30,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          python -m pip install pytest pytest-cov mh-z19
           python -m pip install ".[dev]"
            
       # # ユニットテスト実行
