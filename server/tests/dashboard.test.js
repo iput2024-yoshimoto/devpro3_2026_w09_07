@@ -40,17 +40,18 @@ describe('センサダッシュボード JSテスト', () => {
     // DOMの初期化
     document.body.innerHTML = HTML_STRUCTURE;
 
-    // モジュールキャッシュのクリア（毎回新たにJSを読み込み直せるようにする）
+    // モジュールキャッシュのクリア
     jest.resetModules();
 
     // alert のモック化
     global.alert = jest.fn();
 
-    // location.reload の安全なモック化
-    Object.defineProperty(window, 'location', {
-      configurable: true,
-      value: { reload: jest.fn() }
-    });
+    // location.reload の安全なモック化（delete 経由で退避）
+    delete window.location;
+    window.location = {
+      reload: jest.fn(),
+      href: ''
+    };
 
     // fetch のモック化
     global.fetch = jest.fn(() =>
