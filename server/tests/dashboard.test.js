@@ -40,10 +40,17 @@ describe('センサダッシュボード JSテスト', () => {
     // DOMの初期化
     document.body.innerHTML = HTML_STRUCTURE;
 
-    // alert / location.reload のモック化
+    // モジュールキャッシュのクリア（毎回新たにJSを読み込み直せるようにする）
+    jest.resetModules();
+
+    // alert のモック化
     global.alert = jest.fn();
-    delete window.location;
-    window.location = { reload: jest.fn() };
+
+    // location.reload の安全なモック化
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: { reload: jest.fn() }
+    });
 
     // fetch のモック化
     global.fetch = jest.fn(() =>
@@ -59,35 +66,28 @@ describe('センサダッシュボード JSテスト', () => {
   });
 
   test('平均値（温度・湿度・CO2）が正しく計算されて表示されるか', () => {
-    // スクリプトの実行（DOMContentLoadedイベントを発火）
-    require('../../lastwork/static/Java_iteration_g7.js');
+    require('../src/static/Java_iteration_g7.js');
     window.dispatchEvent(new Event('DOMContentLoaded'));
 
-    // (20.0 + 30.0) / 2 = 25.0
     expect(document.getElementById('avg-temp').textContent).toBe('25.0');
-    // (40.0 + 70.0) / 2 = 55.0
     expect(document.getElementById('avg-humid').textContent).toBe('55.0');
-    // (500 + 1100) / 2 = 800
     expect(document.getElementById('avg-co2').textContent).toBe('800');
   });
 
   test('CO2が1000ppm以上、または湿度が60%以上で警告メッセージが表示されるか', () => {
-    require('../../lastwork/static/Java_iteration_g7.js');
+    require('../src/static/Java_iteration_g7.js');
     window.dispatchEvent(new Event('DOMContentLoaded'));
 
     const warningDiv = document.getElementById('warning-msg');
-    // 2行目のデータが CO2:1100, 湿度:70% なので警告が出るはず
     expect(warningDiv.classList.contains('hidden')).toBe(false);
     expect(global.alert).toHaveBeenCalledWith('環境が悪化しています。換気を行ってください。');
   });
 
   test('手動登録フォーム送信時に /submit へ POST リクエストが飛ばされるか', async () => {
-    require('../../lastwork/static/Java_iteration_g7.js');
+    require('../src/static/Java_iteration_g7.js');
     window.dispatchEvent(new Event('DOMContentLoaded'));
 
     const form = document.getElementById('sensor-form');
-    
-    // フォーム送信イベントを発火
     form.dispatchEvent(new Event('submit'));
 
     expect(global.fetch).toHaveBeenCalledWith('/submit', expect.objectContaining({
