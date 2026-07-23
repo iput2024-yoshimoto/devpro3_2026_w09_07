@@ -42,6 +42,15 @@ const HTML_STRUCTURE = `
 `;
 
 describe('センサダッシュボード JSテスト', () => {
+  beforeAll(() => {
+    // window.location 全体を削除して、Reloadをモック化したオブジェクトに置き換える
+    delete window.location;
+    window.location = {
+      reload: jest.fn(),
+      href: '',
+    };
+  });
+
   beforeEach(() => {
     // DOMの初期化
     document.body.innerHTML = HTML_STRUCTURE;
@@ -49,9 +58,6 @@ describe('センサダッシュボード JSテスト', () => {
 
     // alert のモック化
     global.alert = jest.fn();
-
-    // location.reload を安全にスパイ＆無効化（エラーを出さないようにする）
-    jest.spyOn(window.location, 'reload').mockImplementation(() => {});
 
     // fetch のモック化
     global.fetch = jest.fn(() =>
@@ -64,7 +70,7 @@ describe('センサダッシュボード JSテスト', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   test('平均値（温度・湿度・CO2）が正しく計算されて表示されるか', () => {
