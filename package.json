@@ -1,0 +1,24 @@
+{
+  "name": "devpro3_2026_w09_07",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iput2024-yoshimoto/devpro3_2026_w09_07.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/iput2024-yoshimoto/devpro3_2026_w09_07/issues"
+  },
+  "homepage": "https://github.com/iput2024-yoshimoto/devpro3_2026_w09_07#readme",
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1"
+  }
+}
