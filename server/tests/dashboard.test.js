@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-// テスト用のHTML構造（JSのDOM参照に最適化）
+// テスト用のHTML構造
 const HTML_STRUCTURE = `
   <span id="last-update">--</span>
   <button id="refresh-btn"></button>
@@ -11,10 +11,10 @@ const HTML_STRUCTURE = `
   <span id="avg-co2">----</span>
   
   <form id="sensor-form">
-    <input type="number" id="input-temp" value="25.0">
-    <input type="number" id="input-humid" value="50.0">
-    <input type="number" id="input-co2" value="800">
-    <input type="text" id="input-student-id" value="TK240006">
+    <input type="number" id="input-temp" name="temperature" value="25.0">
+    <input type="number" id="input-humid" name="humidity" value="50.0">
+    <input type="number" id="input-co2" name="co2" value="800">
+    <input type="text" id="input-student-id" name="student_id" value="TK240006">
     <button type="submit">送信</button>
   </form>
 
@@ -42,15 +42,6 @@ const HTML_STRUCTURE = `
 `;
 
 describe('センサダッシュボード JSテスト', () => {
-  beforeAll(() => {
-    // window.location 全体を削除して、Reloadをモック化したオブジェクトに置き換える
-    delete window.location;
-    window.location = {
-      reload: jest.fn(),
-      href: '',
-    };
-  });
-
   beforeEach(() => {
     // DOMの初期化
     document.body.innerHTML = HTML_STRUCTURE;
@@ -58,6 +49,9 @@ describe('センサダッシュボード JSテスト', () => {
 
     // alert のモック化
     global.alert = jest.fn();
+
+    // console.error（jsdomのnavigation警告）をテスト中だけ一時的に非表示にする
+    jest.spyOn(console, 'error').mockImplementation(() => {});
 
     // fetch のモック化
     global.fetch = jest.fn(() =>
@@ -70,12 +64,13 @@ describe('センサダッシュボード JSテスト', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   test('平均値（温度・湿度・CO2）が正しく計算されて表示されるか', () => {
+    // JSの読み込みと実行
     require('../src/static/Java_iteration_g7.js');
-    window.dispatchEvent(new Event('DOMContentLoaded'));
+    document.dispatchEvent(new Event('DOMContentLoaded'));
 
     expect(document.getElementById('avg-temp').textContent).toBe('25.0');
     expect(document.getElementById('avg-humid').textContent).toBe('55.0');
@@ -84,7 +79,7 @@ describe('センサダッシュボード JSテスト', () => {
 
   test('CO2が1000ppm以上、または湿度が60%以上で警告メッセージが表示されるか', () => {
     require('../src/static/Java_iteration_g7.js');
-    window.dispatchEvent(new Event('DOMContentLoaded'));
+    document.dispatchEvent(new Event('DOMContentLoaded'));
 
     const warningDiv = document.getElementById('warning-msg');
     expect(warningDiv.classList.contains('hidden')).toBe(false);
@@ -92,7 +87,7 @@ describe('センサダッシュボード JSテスト', () => {
 
   test('手動登録フォーム送信時に /submit へ POST リクエストが飛ばされるか', async () => {
     require('../src/static/Java_iteration_g7.js');
-    window.dispatchEvent(new Event('DOMContentLoaded'));
+    document.dispatchEvent(new Event('DOMContentLoaded'));
 
     const form = document.getElementById('sensor-form');
     form.dispatchEvent(new Event('submit'));
