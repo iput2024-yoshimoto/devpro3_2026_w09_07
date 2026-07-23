@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>センサダッシュボード</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --sky1: #e0f7fa; --sky2: #b3e5fc; --sky3: #e1f5fe; --deep: #0284c7; --bright: #38bdf8; --text: #0f2942; }
+        body { font-family: "Nunito", "Hiragino Maru Gothic ProN", "M PLUS Rounded 1c", sans-serif; color: var(--text); background: linear-gradient(135deg, var(--sky1), var(--sky2), var(--sky3)) fixed; }
+        h1, h2, .aero-display { font-family: "M PLUS Rounded 1c", sans-serif; }
+        .aero-panel { background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.75); backdrop-filter: blur(18px); box-shadow: 0 8px 32px rgba(2,132,199,0.15); }
+        .aero-card { background: linear-gradient(180deg, rgba(255,255,255,0.75), rgba(255,255,255,0.45)); border: 1px solid rgba(255,255,255,0.8); backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(2,132,199,0.12); }
+        .aero-orb { box-shadow: 0 4px 10px rgba(0,0,0,0.15), inset 0 2px 3px rgba(255,255,255,0.8); }
+        .aero-orb-red { background: radial-gradient(circle at 30% 25%, #ffb4a8, #f87171, #dc2626); }
+        .aero-orb-blue { background: radial-gradient(circle at 30% 25%, #a5e9ff, #38bdf8, #0284c7); }
+        .aero-orb-green { background: radial-gradient(circle at 30% 25%, #bbf7d0, #4ade80, #16a34a); }
+        .aero-btn { background: linear-gradient(180deg, #38bdf8, #0284c7); box-shadow: 0 4px 12px rgba(2,132,199,0.3); }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex justify-center items-start">
+    <div class="w-full max-w-4xl aero-panel rounded-2xl p-6 space-y-6 relative z-10">
+        
+        <!-- ヘッダー -->
+        <div class="flex justify-between items-center bg-gradient-to-b from-[#5fd0f3] to-[#0284c7] text-white p-4 rounded-xl">
+            <h1 class="text-md font-bold">センサダッシュボード</h1>
+            <div class="flex items-center gap-2 text-xs">
+                <span>最終更新: <span id="last-update">--</span></span>
+                <button id="refresh-btn" class="w-7 h-7 bg-white/90 text-[#0284c7] rounded-full shadow flex items-center justify-center"><i class="fa-solid fa-arrow-rotate-right text-xs"></i></button>
+            </div>
+        </div>
+
+        <!-- 集計カード -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="aero-card rounded-2xl p-4 flex items-center gap-4">
+                <div class="aero-orb aero-orb-red rounded-full w-11 h-11 flex items-center justify-center text-white text-lg"><i class="fa-solid fa-temperature-half"></i></div>
+                <div><p class="text-slate-500 text-xs font-semibold">平均温度</p><p class="text-xl font-bold font-mono text-slate-800"><span id="avg-temp">--.-</span> <span class="text-xs font-normal text-slate-500">℃</span></p></div>
+            </div>
+            <div class="aero-card rounded-2xl p-4 flex items-center gap-4">
+                <div class="aero-orb aero-orb-blue rounded-full w-11 h-11 flex items-center justify-center text-white text-lg"><i class="fa-solid fa-droplet"></i></div>
+                <div><p class="text-slate-500 text-xs font-semibold">平均湿度</p><p class="text-xl font-bold font-mono text-sky-600"><span id="avg-humid">--.-</span> <span class="text-xs font-normal text-slate-500">%</span></p></div>
+            </div>
+            <div class="aero-card rounded-2xl p-4 flex items-center gap-4">
+                <div class="aero-orb aero-orb-green rounded-full w-11 h-11 flex items-center justify-center text-white text-lg"><i class="fa-solid fa-cloud"></i></div>
+                <div><p class="text-slate-500 text-xs font-semibold">平均CO2</p><p class="text-xl font-bold font-mono text-green-600"><span id="avg-co2">----</span> <span class="text-xs font-normal text-slate-500">ppm</span></p></div>
+            </div>
+        </div>
+
+        <!-- 手入力フォーム -->
+        <div class="aero-card rounded-2xl p-4">
+            <h2 class="text-xs font-bold text-slate-700 mb-2"><i class="fa-solid fa-pen-to-square text-sky-600 mr-1"></i>データ手動登録</h2>
+            <form id="sensor-form" class="grid grid-cols-2 md:grid-cols-5 gap-2 items-end text-xs">
+                <div><label class="text-slate-500 block mb-0.5">温度 (°C)</label><input type="number" id="input-temp" step="0.1" required class="w-full bg-white/60 border rounded px-2 py-1 font-mono"></div>
+                <div><label class="text-slate-500 block mb-0.5">湿度 (%)</label><input type="number" id="input-humid" step="0.1" required class="w-full bg-white/60 border rounded px-2 py-1 font-mono"></div>
+                <div><label class="text-slate-500 block mb-0.5">CO2 (ppm)</label><input type="number" id="input-co2" required class="w-full bg-white/60 border rounded px-2 py-1 font-mono"></div>
+                <div><label class="text-slate-500 block mb-0.5">学籍番号</label><input type="text" id="input-student-id" required class="w-full bg-white/60 border rounded px-2 py-1 font-mono"></div>
+                <div class="col-span-2 md:col-span-1"><button type="submit" class="w-full aero-btn text-white font-bold py-1.5 rounded"><i class="fa-solid fa-paper-plane text-[10px]"></i> 送信</button></div>
+            </form>
+        </div>
+
+        <!-- テーブル -->
+        <div>
+            <h2 class="text-xs font-bold text-slate-700 mb-2">センサーデータ一覧</h2>
+            <div class="border rounded-xl overflow-hidden max-h-60 overflow-y-auto bg-white/40">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead class="bg-sky-100/80 text-slate-700 font-bold sticky top-0">
+                        <tr><th class="p-2">時刻</th><th class="p-2 text-center">温度</th><th class="p-2 text-center">湿度</th><th class="p-2 text-center">CO2</th><th class="p-2 text-center">学籍番号</th></tr>
+                    </thead>
+                    <tbody id="data-tbody" class="font-medium text-slate-700">
+                        {% for row in input_from_python %}
+                        <tr class="border-b border-white/60 odd:bg-white/30 even:bg-sky-50/30 data-row">
+                            <td class="p-2 font-mono text-slate-500">{{ row[0] }}</td>
+                            <td class="p-2 text-center font-mono temp-cell">{{ row[1] }}</td>
+                            <td class="p-2 text-center font-mono humid-cell">{{ row[2] }}</td>
+                            <td class="p-2 text-center font-mono co2-cell">{{ row[3] if row|length > 3 else '-' }}</td>
+                            <td class="p-2 text-center font-mono student-cell">{{ row[4] if row|length > 4 else '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="warning-msg" class="hidden"><p class="bg-amber-100 border border-amber-400 text-amber-700 text-xs font-bold px-3 py-1 rounded">※換気を推奨します（CO2 1000ppm以上、または湿度60%以上）</p></div>
+        <div class="flex justify-center"><button id="confirm-btn" class="aero-btn text-white text-xs font-bold px-6 py-2 rounded-full"><i class="fa-solid fa-check text-[10px]"></i> 確認しました</button></div>
+    </div>
+
+    <!-- JavaScriptファイルをここで読み込む -->
+    <script src="{{ url_for('static', filename='Java_iteration_g7.js')}}"></script>
+</body>
+</html>
