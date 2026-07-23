@@ -16,6 +16,7 @@ dev = [
     "pytest>=8.0",
     "pytest-cov>=4.0",
 ]
+
 [tool.pytest.ini_options]
 pythonpath = [
     ".",
@@ -27,12 +28,9 @@ testpaths = [
     "server/tests",
     "client/tests"
 ]
-[tool.setuptools.packages.find]
-where = ["server", "client"]
-include = ["src*"]
+
 [tool.setuptools]
 packages = []
 
 [tool.coverage.report]
 show_missing = true
-
