@@ -35,7 +35,7 @@ jobs:
            
       # # ユニットテスト実行
       # ユニットテスト実行
-      - name: Run tests
+      - name: Run Python tests
         timeout-minutes: 2
         env:
           PYTHONPATH: .:server/src:client/src
@@ -49,3 +49,18 @@ jobs:
         uses: MishaKav/pytest-coverage-comment@main
         with:
           pytest-coverage-path: ./pytest-coverage.txt
+      # --- Node.js / Jest (JSテスト) セットアップ ---
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # JSライブラリインストール
+      - name: Install Node.js dependencies
+        run: npm ci
+
+      # JSユニットテスト実行
+      - name: Run JS tests
+        run: npm test
+      
