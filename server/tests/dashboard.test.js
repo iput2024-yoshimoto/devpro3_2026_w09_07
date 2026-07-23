@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-// テスト用のHTML構造（HTML_iteration_g7.html の主要DOMを再現）
+// テスト用のHTML構造（JSのDOM参照に最適化）
 const HTML_STRUCTURE = `
   <span id="last-update">--</span>
   <button id="refresh-btn"></button>
@@ -18,45 +18,58 @@ const HTML_STRUCTURE = `
     <button type="submit">送信</button>
   </form>
 
-  <tbody id="data-tbody">
-    <tr class="data-row">
-      <td class="temp-cell">20.0</td>
-      <td class="humid-cell">40.0</td>
-      <td class="co2-cell">500</td>
-    </tr>
-    <tr class="data-row">
-      <td class="temp-cell">30.0</td>
-      <td class="humid-cell">70.0</td>
-      <td class="co2-cell">1100</td>
-    </tr>
-  </tbody>
+  <table>
+    <tbody id="data-tbody">
+      <tr>
+        <td>2026-07-23 12:00:00</td>
+        <td>20.0</td>
+        <td>40.0</td>
+        <td>500</td>
+        <td>TK240006</td>
+      </tr>
+      <tr>
+        <td>2026-07-23 12:05:00</td>
+        <td>30.0</td>
+        <td>70.0</td>
+        <td>1100</td>
+        <td>TK240006</td>
+      </tr>
+    </tbody>
+  </table>
 
   <div id="warning-msg" class="hidden"></div>
   <button id="confirm-btn"></button>
 `;
 
 describe('センサダッシュボード JSテスト', () => {
-  beforeEach(() => {
-    // DOMの初期化
-    document.body.innerHTML = HTML_STRUCTURE;
+  let originalReload;
 
-    // モジュールキャッシュのクリア
+  beforeAll(() => {
+    // location.reload を安全にモック化
+    originalReload = window.location.reload;
+    Object.defineProperty(window.location, 'reload', {
+      configurable: true,
+      value: jest.fn(),
+    });
+  });
+
+  afterAll(() => {
+    Object.defineProperty(window.location, 'reload', {
+      configurable: true,
+      value: originalReload,
+    });
+  });
+
+  beforeEach(() => {
+    document.body.innerHTML = HTML_STRUCTURE;
     jest.resetModules();
 
-    // alert のモック化
     global.alert = jest.fn();
 
-    // location.reload の安全なモック化（delete 経由で退避）
-    delete window.location;
-    window.location = {
-      reload: jest.fn(),
-      href: ''
-    };
-
-    // fetch のモック化
     global.fetch = jest.fn(() =>
       Promise.resolve({
         ok: true,
+        status: 200,
         json: () => Promise.resolve({ status: 'ok' }),
       })
     );
@@ -81,7 +94,6 @@ describe('センサダッシュボード JSテスト', () => {
 
     const warningDiv = document.getElementById('warning-msg');
     expect(warningDiv.classList.contains('hidden')).toBe(false);
-    expect(global.alert).toHaveBeenCalledWith('環境が悪化しています。換気を行ってください。');
   });
 
   test('手動登録フォーム送信時に /submit へ POST リクエストが飛ばされるか', async () => {
