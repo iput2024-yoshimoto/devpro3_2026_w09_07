@@ -24,7 +24,7 @@ def client_app():
     Flaskのテスト用クライアントを提供するFixture。
     テスト関数の引数に client_app と書くだけで HTTPリクエストのテストが可能になります。
     """
-    # テストモードを有効化（エラーの詳細が出やすくなります）
+    # テストモードを有効化（エラーの詳細が出やすくなりす）
     app.config.update({
         "TESTING": True,
     })
