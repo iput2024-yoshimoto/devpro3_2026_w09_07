@@ -62,9 +62,9 @@ jobs:
       - name: Install Node.js dependencies
         run: npm ci
 
-      # JSユニットテスト実行（junit.xmlを出力）
+      # JSユニットテスト実行（package.jsonの設定により junit.xml が出力される）
       - name: Run JS tests
-        run: npx jest --reporters=default --reporters=jest-junit
+        run: npm test
 
       # Jestのテスト結果をレポート出力
       - name: JS Test Report
