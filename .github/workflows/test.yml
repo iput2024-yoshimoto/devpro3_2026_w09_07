@@ -33,7 +33,7 @@ jobs:
           python -m pip install pytest pytest-cov pytest-mock pytest-github-actions-annotate-failures
           python -m pip install ".[dev]"
 
-      # ユニットテスト実行（カバー率結果を pytest-coverage.txt に保存）
+      # センサ/Pythonコードのユニットテスト実行（junit.xml と pytest-coverage.txt を同時出力）
       - name: Run Python tests
         timeout-minutes: 2
         env:
@@ -42,9 +42,18 @@ jobs:
           CSV_FILENAME: sensor_data.csv
           SOCKET_PORT: 5000
         run: |
-          pytest -v -s --cov=server/src --cov=client/src --cov-report=term-missing | tee pytest-coverage.txt
+          pytest -v -s --cov=server/src --cov=client/src --cov-report=term-missing --junitxml=junit.xml | tee pytest-coverage.txt
 
-      # テスト結果をPRにコメントする
+      # 1. Pytestのテスト結果を Actions の Checks / Report 画面に見やすく表示
+      - name: Python Test Report
+        uses: dorny/test-reporter@v1
+        if: always() # テストが失敗してもレポートを出力する
+        with:
+          name: Python (Pytest) Tests
+          path: junit.xml
+          reporter: java-junit # Pytestが出力するJUnit XML形式を読み込む設定
+
+      # 2. カバレッジ結果を PR にコメント投稿（PR時のみ）
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main
         if: always()
@@ -58,19 +67,8 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      # JSライブラリインストール
       - name: Install Node.js dependencies
         run: npm ci
 
-      # JSユニットテスト実行（package.jsonの設定により junit.xml が出力される）
       - name: Run JS tests
         run: npm test
-
-      # Jestのテスト結果をレポート出力
-      - name: JS Test Report
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: JS Tests
-          path: junit.xml
-          reporter: jest-junit
