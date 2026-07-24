@@ -1,5 +1,4 @@
 import client.src.get_co2_data
-import client.src.get_dht_data
 import sensor
 
 class TestSensorModules:
@@ -15,7 +14,6 @@ class TestSensorModules:
         assert res == -1
 
     def test_main_loop_one_cycle(self, mocker):
-        mock_get_dht = mocker.patch("sensor.get_dht_data", return_value=(24.0, 58.0))
         mock_get_co2 = mocker.patch("sensor.get_co2_data", return_value=400)
         
         # 1周目で強制終了させるために例外を投げる
@@ -29,5 +27,6 @@ class TestSensorModules:
         except KeyboardInterrupt:
             pass
 
-        assert mock_get_dht.called
+        # DHTの確認を削除し、代わりにCO2が呼ばれたかを確認
+        assert mock_get_co2.called
         assert mock_send_server.called
