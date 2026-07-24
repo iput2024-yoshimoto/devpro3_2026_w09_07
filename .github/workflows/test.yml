@@ -63,4 +63,11 @@ jobs:
       # JSユニットテスト実行
       - name: Run JS tests
         run: npm test
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: always() # テストが失敗しても実行する
+        with:
+          name: JS Tests
+          path: junit.xml # Jest等で出力したレポートXML
+          reporter: jest-junit
       
