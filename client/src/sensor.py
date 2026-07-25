@@ -13,7 +13,7 @@ WAITING_PORT = int(config.WAITING_PORT)
 NAME = config.NAME
 
 WAIT_INTERVAL_RETRY = 5
-WAIT_INTERVAL = 10 # サーバへの負荷を考慮し、送信間隔を少し長め(10秒など)にするのがおすすめです
+WAIT_INTERVAL = 10
 
 # --- 温度・湿度取得 ---
 dht22_instance = dht22.DHT22(gpio=26)
