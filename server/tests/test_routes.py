@@ -61,32 +61,46 @@ def test_submit_route_exception(mock_save, client):
     assert "Internal Server Error" in response.data.decode("utf-8")
 
 # --- GET /latest のテスト ---
-@patch("server.src.routes.get_latest_row")
-def test_latest_route_success(mock_get_latest, client):
-    """最新データが存在する場合、カンマ区切り文字列と200 OKが返るか検証"""
-    mock_get_latest.return_value = ["2026-01-01 12:00", "24.0", "50.0", "420", "ID01", "extra_field"]
+@patch("server.src.routes.read_all_rows")
+def test_latest_route_success(mock_read_all, client):
+    """最新データが存在する場合、改行区切りの複数行テキストと200 OKが返るか検証"""
+    # 1. モックの返り値を read_all_rows の仕様（リストのリスト）に変更
+    mock_read_all.return_value = [
+        ["2026-01-01 12:00", "24.0", "50.0", "420", "ID01"],
+        ["2026-01-01 12:01", "24.5", "51.0", "430", "ID02"]
+    ]
     
     response = client.get("/latest")
     
     assert response.status_code == 200
     assert "text/plain" in response.headers["Content-Type"]
-    assert response.data.decode("utf-8") == "2026-01-01 12:00,24.0,50.0,420,ID01"
+    
+    # 改行で結合されて返ってくるか検証
+    expected_data = (
+        "2026-01-01 12:00,24.0,50.0,420,ID01\n"
+        "2026-01-01 12:01,24.5,51.0,430,ID02"
+    )
+    assert response.data.decode("utf-8") == expected_data
 
-@patch("server.src.routes.get_latest_row")
-def test_latest_route_no_data(mock_get_latest, client):
-    """データが存在しない場合、404 Not Found が返るか検証"""
-    mock_get_latest.return_value = None
+@patch("server.src.routes.read_all_rows")
+def test_latest_route_no_data(mock_read_all, client):
+    """データが存在しない（空配列）場合、404 Not Found が返るか検証"""
+    mock_read_all.return_value = []
     
     response = client.get("/latest")
     
     assert response.status_code == 404
     assert "No data available" in response.data.decode("utf-8")
 
-@patch("server.src.routes.get_latest_row")
-def test_latest_route_insufficient_columns(mock_get_latest, client):
-    """最新データの要素数が5未満の場合、404 Not Found が返るか検証"""
-    mock_get_latest.return_value = ["2026-01-01 12:00", "24.0"]
+@patch("server.src.routes.read_all_rows")
+def test_latest_route_insufficient_columns(mock_read_all, client):
+    """有効な列（5列以上）を持つデータが存在しない場合、404 Not Found が返るか検証"""
+    # 5列未満の不完全なデータのみ
+    mock_read_all.return_value = [
+        ["2026-01-01 12:00", "24.0"]
+    ]
     
     response = client.get("/latest")
     
     assert response.status_code == 404
+    assert "No data available" in response.data.decode("utf-8")
