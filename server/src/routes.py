@@ -37,9 +37,28 @@ def submit():
 
 @main_bp.route("/latest", methods=["GET"])
 def latest():
-    latest_row = get_latest_row()
-    if latest_row and len(latest_row) >= 5:
-        csv_response = ",".join(latest_row[:5])
-        return csv_response, 200, {'Content-Type': 'text/plain'}
+    try:
+        # CSVから全行を取得
+        all_rows = read_all_rows()
         
-    return "No data available", 404
+        if not all_rows:
+            return "No data available", 404
+
+        # 5項目揃っている有効なデータのみ抽出
+        valid_rows = [row for row in all_rows if len(row) >= 5]
+
+        # 末尾（最新）の10件を取得（10件未満なら全件）
+        latest_10_rows = valid_rows[-10:]
+
+        if latest_10_rows:
+            # 1行ずつカンマ区切りにし、それを改行（\n）で結合する
+            lines = [",".join(row[:5]) for row in latest_10_rows]
+            csv_response = "\n".join(lines)
+            
+            return csv_response, 200, {'Content-Type': 'text/plain; charset=utf-8'}
+
+        return "No data available", 404
+
+    except Exception as e:
+        print(f"[HTTP Latest Error] {e}")
+        return "Internal Server Error", 500
