@@ -24,9 +24,11 @@ class TestFlaskEndpoints:
         assert mock_save.called
 
     def test_latest_endpoint(self, client_app, mocker):
-        # ここも "routes.get_latest_row" に変更
-        dummy_row = ["2026-07-24 12:00:00", "26.4", "55.0", "450", "tk240006"]
-        mocker.patch("routes.get_latest_row", return_value=dummy_row)
+        # read_all_rows の返り値に合わせて「リストのリスト」でダミーデータを用意
+        dummy_rows = [["2026-07-24 12:00:00", "26.4", "55.0", "450", "tk240006"]]
+        
+        # 修正：モック対象を routes.read_all_rows に変更
+        mocker.patch("routes.read_all_rows", return_value=dummy_rows)
 
         response = client_app.get("/latest")
         
