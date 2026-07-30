@@ -70,7 +70,7 @@ class DHT22:
         # pull down to low
         self.__send_and_sleep(0, 0.02)  # LOW
 
-        # ★修正箇所1: ピンを入力に切り替える前に、出力を解放する（クラッシュ回避）
+        #ピンを入力に切り替える前に、出力を解放する
         lgpio.gpio_free(self.__h, self.__gpio)
 
         # change to input using pull up
@@ -130,7 +130,7 @@ class DHT22:
         unchanged_count = 0
 
         # this is used to determine where is the end of the data
-        # ★修正箇所2: 100では正常な通信途中でタイムアウトするため10000に変更
+        #100では正常な通信途中でタイムアウトするため10000に変更
         max_unchanged_count = 10000
 
         last = -1
